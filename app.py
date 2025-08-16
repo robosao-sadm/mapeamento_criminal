@@ -170,23 +170,7 @@ def renderizar_mapa_completo(mapa: folium.Map, dataframe: pd.DataFrame, indice_a
 # 4) App principal
 # =======================
 conteudos_app = [
-    'Slide1.JPG',
-    'Slide2.JPG',
-    'Slide3.JPG',
-    'Slide4.JPG',
-    'Slide5.JPG',
-    'Slide6.JPG',
-    'Slide7.JPG',
-    'Slide8.JPG',
     'mapa',
-    'Slide9.JPG',
-    'Slide10.JPG',
-    'Slide11.JPG',
-    'Slide12.JPG',
-    'Slide13.JPG',
-    'Slide14.JPG',
-    'Slide15.JPG',
-    'Slide16.JPG',
 ]
 
 if 'indice_atual' not in st.session_state:
