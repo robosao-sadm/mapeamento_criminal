@@ -189,16 +189,16 @@ elif conteudo_atual == 'mapa':
     unique_naturezas = sorted(df_raw['DESCR_NATUREZA_PRINCIPAL'].unique())
     unique_municipios = sorted(df_raw['MUNICIPIO'].unique())
 
-    st.markdown("### Filtros de visualização")
-    filter_cols = st.columns(2)
-    with filter_cols[0]:
+    with st.sidebar:
+        st.markdown("### Filtros de visualização")
+
         selected_naturezas = st.multiselect(
             "Natureza do Crime",
             options=unique_naturezas,
             default=unique_naturezas,
             key="natureza_multiselect"
         )
-    with filter_cols[1]:
+
         selected_municipios = st.multiselect(
             "Município",
             options=unique_municipios,
@@ -206,9 +206,45 @@ elif conteudo_atual == 'mapa':
             key="municipio_multiselect"
         )
 
+        # --- Novo seletor de períodos pré-definidos
+        st.markdown("### Período de análise")
+        periodo_opcao = st.radio(
+            label="Período:",
+            options=["Últimos 7 dias", "Últimos 14 dias", "Últimos 31 dias", "Selecionar intervalo manual"],
+            key="radio_periodo"
+        )
+
+        hoje = pd.Timestamp.today().normalize()
+
+        if periodo_opcao == "Selecionar intervalo manual":
+            start_date = st.date_input(
+                "Data inicial",
+                value=df_raw["DATA_FATO"].min().date(),
+                key="start_date_input"
+            )
+            end_date = st.date_input(
+                "Data final",
+                value=df_raw["DATA_FATO"].max().date(),
+                key="end_date_input"
+            )
+            # Validação para não passar de 31 dias
+            if (pd.to_datetime(end_date) - pd.to_datetime(start_date)).days > 31:
+                st.error("Selecione um intervalo de no máximo 31 dias.")
+        else:
+            if periodo_opcao == "Últimos 7 dias":
+                start_date = (hoje - pd.Timedelta(days=7)).date()
+            elif periodo_opcao == "Últimos 14 dias":
+                start_date = (hoje - pd.Timedelta(days=14)).date()
+            else:
+                start_date = (hoje - pd.Timedelta(days=31)).date()
+            end_date = hoje.date()
+
+    # --- Aplicação dos filtros
     df = df_raw[
-        df_raw['DESCR_NATUREZA_PRINCIPAL'].isin(selected_naturezas) &
-        df_raw['MUNICIPIO'].isin(selected_municipios)
+        (df_raw['DESCR_NATUREZA_PRINCIPAL'].isin(selected_naturezas)) &
+        (df_raw['MUNICIPIO'].isin(selected_municipios)) &
+        (df_raw['DATA_FATO'].dt.date >= start_date) &
+        (df_raw['DATA_FATO'].dt.date <= end_date)
     ].reset_index(drop=True)
 
     with st.container():
@@ -263,7 +299,7 @@ elif conteudo_atual == 'mapa':
             - **Intervalo:** {string_intervalo_painel}
             - **Causa Presumida:** {incidente.get('CAUSA_PRESUMIDA', 'N/A')}
             - **Local:** {incidente.get('DESCRICAO_LOCAL_IMEDIATO', 'N/A')}
-            - **Sintese do fato:** {incidente.get('SINTESE', 'N/A')}
+            - **Síntese do fato:** {incidente.get('SINTESE', 'N/A')}
             """)
 
             bcols = st.columns(2)
