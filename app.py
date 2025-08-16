@@ -82,7 +82,7 @@ def carregar_dados(caminho_csv: str) -> pd.DataFrame:
 
     return df.sort_values("DATA_FATO", na_position="last").reset_index(drop=True)
 
-csv_path = "relatorio_estatisticas_reds_1754785984305.csv"
+csv_path = "relatorio_estatisticas_reds.csv"
 try:
     df_raw = carregar_dados(csv_path)
 except Exception as e:
