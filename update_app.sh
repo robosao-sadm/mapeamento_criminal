@@ -1,24 +1,26 @@
 #!/bin/bash
 
-# Configurações
-REPO_DIR=~/mapeamento_criminal
-IMAGE_NAME=mapa-criminal-streamlit
-CONTAINER_NAME=meu-app-mapa
-HOST_PORT=8052
-CONTAINER_PORT=8502
+# Caminho do projeto
+APP_DIR=~/mapeamento_criminal
+APP_NAME=meu-app-mapa
+IMAGE_NAME=mapa-criminal-streamlit:latest
 
 echo "🔄 Atualizando repositório..."
-cd $REPO_DIR || { echo "Erro: pasta $REPO_DIR não existe"; exit 1; }
+cd $APP_DIR || exit
 git pull origin main
 
-echo "📦 Build da imagem Docker..."
-docker build -t $IMAGE_NAME:latest .
+echo "🔨 Build da imagem Docker..."
+docker build -t $IMAGE_NAME .
 
 echo "🛑 Parando e removendo container antigo (se existir)..."
-docker stop $CONTAINER_NAME 2>/dev/null
-docker rm $CONTAINER_NAME 2>/dev/null
+docker stop $APP_NAME 2>/dev/null || true
+docker rm $APP_NAME 2>/dev/null || true
 
-echo "🚀 Rodando container atualizado..."
-docker run -d -p $HOST_PORT:$CONTAINER_PORT --name $CONTAINER_NAME $IMAGE_NAME:latest
+echo "🚀 Rodando container atualizado na porta 8052..."
+docker run -d \
+  -p 8052:8501 \
+  --name $APP_NAME \
+  $IMAGE_NAME \
+  streamlit run app.py --server.address=0.0.0.0 --server.port=8501
 
-echo "✅ Atualização concluída! Acesse o app em http://SEU-IP:$HOST_PORT"
+echo "✅ Atualização concluída! Acesse o app em http://SEU-IP:8052"
